@@ -55,10 +55,14 @@ if state == INIT_STATE then
   MB.W(5009,0,table.getn(acqStartWriteData))
   MB.WA(5010,99,table.getn(configBytes),configBytes)
   MB.W(5007,0,1)
+
+  --Start waiting for a trigger to occur.
+  state = WAIT_TRIG_STATE
 elseif state = WAIT_TRIG_STATE then
   -- Waiting for trigger
   local fio0 = MB.R(2000, 0)
   if fio0 == 1 then
+    --Switch to the acquisitino state.
     state = ACQ_STATE
   end
 elseif state = ACQ_STATE then
@@ -78,10 +82,14 @@ elseif state = ACQ_STATE then
   -- 4. Toggle FIO1 line to indicate that a trigger occured.
   MB.W(2001,0,1)
   MB.W(2001,0,FIO1_INIT_STATE)
+
+  --Wait for the trigger signal to re-set.
+  state = TRIG_RESET_STATE
 elseif state = TRIG_RESET_STATE then
   -- Wait for trigger to re-set
   local fio0 = MB.R(2000, 0)
   if fio0 == 0 then
+    --Start waiting for a trigger to occur.
     state = WAIT_TRIG_STATE
   end
 else 
