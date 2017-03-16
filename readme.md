@@ -1,8 +1,8 @@
 # SPI, FIFO Queues, and DIO Triggered State Machine example
 
-This is an example for how to configure a T7 with a Lua Script to recieve a 1kHz control pulse and respond to each pulse by reading data from a SPI bus data source and control a secondary DIO line accordingly.
+This is an example for how to configure a T7 with a Lua Script to recieve a control pulse on FIO0 (for example, a 1kHz square wave) and respond to each pulse by reading data from a SPI bus data source and control a secondary DIO line accordingly.
 
-To provide a brief explanation of the hardware involved in this example, a T7 is being connected to a digital control line that uses 3.3V logic and creating square wave pulses at a rate of 1kHz.  The trigger condition is defined as when the digital I/O line switches from low (0V) to high (3.3V).  Each of these pulses instruct the T7 to write _XXX_ number of bytes of data out to a SPI slave device.  After doing this, 9 bytes of data need to then be read from the SPI slave device.  
+To provide a brief explanation of the hardware involved in this example, a T7 is being connected to a digital control line that uses 3.3V logic and creating square wave pulses at a rate of 1kHz.  The trigger condition is defined as when the digital I/O line switches from low (0V) to high (3.3V).  Each of these pulses instruct the T7 to write 6 bytes of data out to a SPI slave device.  After doing this, 9 bytes of data need to then be read from the SPI slave device.
 
 This data will be saved to the data queue that is accesable through the USER_RAM_FIFOx set of registers.  In this example, we will be using the USER_RAM_FIFO0_DATA_U16 which is a first-in-first-out data queue.  The T7's lua script will be collecting data from SPI and saving it directly to the FIFO for a secondary application to then collect and interpret.
 
