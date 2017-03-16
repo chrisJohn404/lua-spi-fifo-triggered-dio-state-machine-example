@@ -1,10 +1,10 @@
 print("fio-spi-fifo-v1")
 
 --Configure the T7's SPI bus
-MB.W(5000, 0, 0)  --CS, EIO0
-MB.W(5001, 0, 1)  --CLK, EIO1
-MB.W(5002, 0, 2)  --MISO, EIO2
-MB.W(5003, 0, 3)  --MOSI, EIO3
+MB.W(5000, 0, 8)  --CS, EIO0
+MB.W(5001, 0, 9)  --CLK, EIO1
+MB.W(5002, 0, 2)  --MISO, FIO2
+MB.W(5003, 0, 11)  --MOSI, EIO3
 
 MB.W(5004, 0, 0)  --Mode
 MB.W(5005, 0, 0)  --Speed
@@ -25,6 +25,11 @@ for i=1,acqStateNumBytesToRead do
 end
 
 --Configure FIFO system
+numReadsToSaveInFIFO0 = 10
+numBytesPerSamples = 2
+numBytesAllocFIFO0 = acqStateNumBytesToRead * numReadsToSaveInFIFO0 * numBytesPerSamples
+MB.W(47900, 1, numBytesAllocFIFO0)
+numBytesFIFO0 = MB.R(47910, 1)
 
 --Configure the state machine's state
 --0: Initializing
@@ -59,13 +64,15 @@ curNoPrintCount = 0
 while true do
   -- Debugging Code
   if oldState ~= state then
-    oldState = state
    print('Switching from', oldState, 'to: ', state)
+   oldState = state
   else
     curNoPrintCount=curNoPrintCount+1
     if curNoPrintCount >= numBetweenStatusUpdate then
       curNoPrintCount = 0
-      print('Current State', state)
+      numBytesFIFO0 = MB.R(47910, 1)
+      local numReads = numBytesFIFO0/(acqStateNumBytesToRead*numBytesPerSamples)
+      print('Current State', state, 'numBytes', numBytesFIFO0, 'numReads', numReads)
     end
   end
 
@@ -101,10 +108,23 @@ while true do
     MB.W(5009,0,acqStateNumBytesToRead)
     MB.WA(5010,99,acqStateNumBytesToRead,dummyWriteDataForRead)
     MB.W(5007,0,1)
-    local readData = MB.RA(5050, 99)
-  
-    -- TODO: 3. Save collected data to FIFO
+    local readData = MB.RA(5050, 99, acqStateNumBytesToRead)
+    print("Read SPI Data", table.getn(readData))
     
+  
+    -- 3. Save collected data to FIFO
+    numBytesFIFO0 = MB.R(47910, 1)
+    if (numBytesFIFO0 < numBytesAllocFIFO0) then
+      -- MB.WA(47000,0,table.getn(readData)-0,readData)
+      for i=1,table.getn(readData) do
+        local newVal = readData[i]
+        MB.W(47000,0,newVal)
+      end
+      numBytesFIFO0 = MB.R(47910, 1)
+      print("Num bytes in buffer", numBytesFIFO0)
+    else
+      print ("FIFO0 buffer is full.")
+    end
     
     -- 4. Toggle FIO1 line to indicate that a trigger occured.
     MB.W(2001,0,1)
