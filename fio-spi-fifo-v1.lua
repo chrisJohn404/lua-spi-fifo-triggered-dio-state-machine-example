@@ -61,6 +61,12 @@ oldState = 0
 numBetweenStatusUpdate = 50000
 curNoPrintCount = 0
 
+function spiWrite (data)
+  MB.W(5009,0,table.getn(data))
+  MB.WA(5010,99,table.getn(data),data)
+  MB.W(5007,0,1)
+end
+
 while true do
   -- Debugging Code
   if oldState ~= state then
@@ -89,7 +95,7 @@ while true do
     -- Waiting for trigger
     local fio0 = MB.R(2000, 0)
     if fio0 == 1 then
-      curNum = curNum +1
+      curNum = curNum + 1
       if curNum >= numReq then
         --Switch to the acquisitino state.
         state = ACQ_STATE
