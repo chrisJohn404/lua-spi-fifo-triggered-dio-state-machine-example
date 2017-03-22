@@ -55,11 +55,14 @@ The number of bytes currently in the FIFO can be read by the USER_RAM_FIFO#(0:3)
 More information about the FIFO registers can be found in the Scripting section of the T7 Datasheet.  
 https://labjack.com/support/datasheets/t7/scripting
 
-Changelog:
+## Changelog:
+### V1
 v1 of example code & application uses a state machine checking the FIO line for toggles to then go into a state where the SPI bus was read.  The data is buffered using uint16 data types.
+
+### V2
 v2 of example code & application require the input-trigger to go to CIO0 which is configured as a high-speed counter and the lua script reads the counter's value to see if it had any counts.  v2 of the lua script also sets several IO lines for debugging purposes.  Here is a list of debugging pins:
-CIO0 - Input Pulse, 1k square wave results in some SPI data being missed.  950Hz was working well (3/21/2017, FW1.0216, LJM1.1403).
-FIO1 - When the IO line is high, SPI data is being sampled.  
-FIO3 - This is set when multiple triggers have passed between querying for the last data set.  This indicates that there is missing data.
-FIO0 - is toggled when the data que gets filled up and the latest data that was collected wasn't saved.
-DIO0 - is toggled when data is saved to the queue successfully.
+* CIO0 - Input Pulse, 1k square wave results in some SPI data being missed.  950Hz was working well (3/21/2017, FW1.0216, LJM1.1403).
+* FIO1 - When the IO line is high, SPI data is being sampled.  
+* FIO3 - This is set when multiple triggers have passed between querying for the last data set.  This indicates that there is missing data.
+* FIO0 - is toggled when the data que gets filled up and the latest data that was collected wasn't saved.
+* DIO0 - is toggled when data is saved to the queue successfully.
