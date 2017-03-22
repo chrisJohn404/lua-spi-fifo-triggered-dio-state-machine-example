@@ -27,7 +27,7 @@ for i=1,acqStateNumBytesToRead do
 end
 
 --Configure FIFO system
-numReadsToSaveInFIFO0 = 10
+numReadsToSaveInFIFO0 = 40
 numBytesPerSamples = 2
 numBytesAllocFIFO0 = acqStateNumBytesToRead * numReadsToSaveInFIFO0 * numBytesPerSamples
 MB.W(47900, 1, numBytesAllocFIFO0)
